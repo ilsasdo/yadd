@@ -8,6 +8,6 @@
     "newtab": "newtab.html"
   },
   "sandbox": {
-    "pages": ["widgets/empty/index.html"]
+    "pages": ["widgets/empty/index.html", "widgets/github-prs/index.html"]
   }
 }

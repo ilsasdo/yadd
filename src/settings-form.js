@@ -21,7 +21,8 @@
       }
     } else {
       input = document.createElement("input");
-      input.type = ["number", "checkbox", "color"].includes(field.type) ? field.type : "text";
+      input.type = ["number", "checkbox", "color", "password"].includes(field.type) ? field.type : "text";
+      if (input.type === "password") input.autocomplete = "off";
       if (input.type === "checkbox") {
         input.checked = Boolean(value);
         label.classList.add("checkbox");

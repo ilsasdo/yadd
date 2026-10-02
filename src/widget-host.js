@@ -80,7 +80,8 @@
         this.frame.title = this.name;
         // Extra isolation inside the extension. Not applied on file://, where an opaque-origin
         // frame cannot load local scripts (Chrome already treats file:// documents as unique origins).
-        if (location.protocol !== "file:") this.frame.sandbox = "allow-scripts";
+        // Popups are allowed so widgets can open links (e.g. target="_blank") in a normal tab.
+        if (location.protocol !== "file:") this.frame.sandbox = "allow-scripts allow-popups allow-popups-to-escape-sandbox";
         this.frame.src = this.definition.url;
         body.append(this.frame);
       } else {

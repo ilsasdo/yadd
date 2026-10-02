@@ -25,6 +25,20 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
   are edited on its back; **Save** (or Enter) applies them, **Cancel** (or Esc) flips it back.
 - Layout and settings are saved in `chrome.storage.local` (or `localStorage` when opened as a file).
 
+## Widgets
+
+- **Empty widget** – shows a configurable text.
+- **GitHub pull requests** – runs a GitHub search query and lists the matching PRs with their
+  title, status (Open / Draft / Merged / Closed), repository, review decision and CI checks.
+  Click a title to open the PR. Settings:
+  - *Search query* – any [GitHub search query](https://docs.github.com/en/search-github/searching-on-github/searching-issues-and-pull-requests),
+    e.g. `is:open review-requested:@me` (`is:pr` is added automatically if missing).
+  - *GitHub API token* – a [personal access token](https://github.com/settings/tokens). A classic
+    token needs the `repo` scope for private repositories (none for public ones); a fine-grained
+    token needs read access to *Pull requests* (and *Commit statuses* to show checks).
+    The token is stored unencrypted in the extension's local storage.
+  - *Max results* and *Refresh every (minutes)*.
+
 ## Project layout
 
 ```
@@ -59,7 +73,7 @@ through the SDK.
        ]
      });
      ```
-     Supported setting types: `text`, `number`, `checkbox`, `select`, `color`
+     Supported setting types: `text`, `password` (masked input), `number`, `checkbox`, `select`, `color`
      (optional `required`, `min`, `max`, `step`, `placeholder`). `select` options can be
      strings or `{ value, label }` objects.
    - `index.html` – the main page. Include `<script src="../sdk.js"></script>` and your script.

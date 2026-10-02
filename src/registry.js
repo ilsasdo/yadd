@@ -2,7 +2,7 @@
   window.Dashboard ??= {};
 
   // Add a folder name here to register a new widget type (see README).
-  const WIDGET_TYPES = ["empty"];
+  const WIDGET_TYPES = ["empty", "github-prs"];
 
   const pending = new Map();
 
