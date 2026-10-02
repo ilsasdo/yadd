@@ -1,6 +1,6 @@
 (() => {
   window.Dashboard ??= {};
-  const { COLUMNS, clampPosition, clampSize, createSettingsForm, defaultSettings, pixelsToCell, pixelsToSize, postToWidget, sameRect, toPixels } = window.Dashboard;
+  const { CARD_TITLE_KEY, COLUMNS, clampPosition, clampSize, createSettingsForm, defaultSettings, pixelsToCell, pixelsToSize, postToWidget, sameRect, toPixels } = window.Dashboard;
 
   function button(label, text, onClick) {
     const el = document.createElement("button");
@@ -33,8 +33,13 @@
       return { x, y, w, h };
     }
 
-    get name() {
+    get typeName() {
       return this.definition?.name ?? `Unknown widget (${this.instance.type})`;
+    }
+
+    get name() {
+      const title = this.instance.settings?.[CARD_TITLE_KEY];
+      return (typeof title === "string" && title.trim()) || this.typeName;
     }
 
     get frameWindow() {
@@ -60,6 +65,7 @@
       actions.append(...buttons);
       toolbar.append(name, actions);
       toolbar.addEventListener("pointerdown", (event) => this.#startInteraction(event, "move"));
+      toolbar.nameElement = name;
       return toolbar;
     }
 
@@ -71,6 +77,7 @@
       const settingsButton = button("Widget settings", "⚙", () => this.openSettings());
       settingsButton.disabled = !this.definition;
       const toolbar = this.#toolbar(this.name, [settingsButton, button("Remove widget", "✕", () => onRemove(this))]);
+      this.nameElement = toolbar.nameElement;
 
       const body = document.createElement("div");
       body.className = "widget-body";
@@ -122,6 +129,7 @@
       const form = createSettingsForm(this.definition, this.settings, {
         onSave: (values) => {
           this.instance.settings = values;
+          this.#updateTitle();
           this.onCommit(this);
           this.pushSettings();
           this.closeSettings();
@@ -131,6 +139,12 @@
       const close = button("Close settings", "✕", () => this.closeSettings());
       this.back.replaceChildren(this.#toolbar(`${this.name} · Settings`, [close]), form);
       this.#flip(true);
+    }
+
+    #updateTitle() {
+      this.nameElement.textContent = this.name;
+      if (this.frame) this.frame.title = this.name;
+      this.back.setAttribute("aria-label", `${this.name} settings`);
     }
 
     closeSettings() {

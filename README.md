@@ -23,6 +23,7 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
   would overlap another widget snap back.
 - Hover a widget to show **⚙ settings** and **✕ remove**. Settings flip the widget over and
   are edited on its back; **Save** (or Enter) applies them, **Cancel** (or Esc) flips it back.
+- Every widget has a **Card title** setting shown in its top bar (leave it blank to use the widget's name).
 - Layout and settings are saved in `chrome.storage.local` (or `localStorage` when opened as a file).
 
 ## Widgets
@@ -73,6 +74,7 @@ through the SDK.
        ]
      });
      ```
+     A `cardTitle` setting is added to every widget automatically, so don't declare it yourself.
      Supported setting types: `text`, `password` (masked input), `number`, `checkbox`, `select`, `color`
      (optional `required`, `min`, `max`, `step`, `placeholder`). `select` options can be
      strings or `{ value, label }` objects.

@@ -4,6 +4,8 @@
   // Add a folder name here to register a new widget type (see README).
   const WIDGET_TYPES = ["empty", "github-prs"];
 
+  const CARD_TITLE_KEY = "cardTitle";
+
   const pending = new Map();
 
   function defaultSettings(definition) {
@@ -14,12 +16,14 @@
   function registerWidget(manifest) {
     const script = document.currentScript;
     const base = new URL(".", script.src).href;
+    const settings = (Array.isArray(manifest.settings) ? manifest.settings : []).filter((field) => field.key !== CARD_TITLE_KEY);
     pending.get(script)?.({
       ...manifest,
       url: new URL(manifest.entry ?? "index.html", base).href,
       defaultSize: manifest.defaultSize ?? { w: 3, h: 2 },
       minSize: manifest.minSize ?? { w: 1, h: 1 },
-      settings: Array.isArray(manifest.settings) ? manifest.settings : []
+      // Every widget gets a host-managed card title; blank falls back to the widget name.
+      settings: [{ key: CARD_TITLE_KEY, label: "Card title", type: "text", default: "", placeholder: manifest.name }, ...settings]
     });
   }
 
@@ -50,5 +54,5 @@
     return registry;
   }
 
-  Object.assign(window.Dashboard, { defaultSettings, loadRegistry, registerWidget });
+  Object.assign(window.Dashboard, { CARD_TITLE_KEY, defaultSettings, loadRegistry, registerWidget });
 })();
