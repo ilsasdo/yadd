@@ -1,10 +1,5 @@
 (() => {
   window.Dashboard ??= {};
-  const dialog = document.querySelector("#settings-dialog");
-  const form = document.querySelector("#settings-form");
-  const title = document.querySelector("#settings-title");
-  const fieldsContainer = document.querySelector("#settings-fields");
-  const cancelButton = document.querySelector("#settings-cancel");
 
   function normalizeOptions(options = []) {
     return options.map((option) =>
@@ -44,7 +39,7 @@
     return label;
   }
 
-  function readValues(schema) {
+  function readValues(form, schema) {
     const values = {};
     for (const field of schema) {
       const input = form.elements.namedItem(field.key);
@@ -56,36 +51,50 @@
     return values;
   }
 
-  function openSettings(definition, currentValues) {
+  function actionButton(text, type, className) {
+    const el = document.createElement("button");
+    el.type = type;
+    el.textContent = text;
+    if (className) el.className = className;
+    return el;
+  }
+
+  // Builds an inline settings form for a widget definition. Calls onSave(values) or onCancel().
+  function createSettingsForm(definition, currentValues, { onSave, onCancel }) {
     const schema = definition.settings;
-    title.textContent = `${definition.name} settings`;
-    fieldsContainer.replaceChildren(
+    const form = document.createElement("form");
+    form.className = "settings-form";
+    form.noValidate = true;
+
+    const fields = document.createElement("div");
+    fields.className = "settings-fields";
+    fields.append(
       ...(schema.length
         ? schema.map((field) => buildField(field, currentValues[field.key]))
         : [Object.assign(document.createElement("p"), { className: "settings-empty", textContent: "This widget has no settings." })])
     );
 
-    return new Promise((resolve) => {
-      let result = null;
-      const onSubmit = (event) => {
-        event.preventDefault();
-        if (!form.reportValidity()) return;
-        result = readValues(schema);
-        dialog.close();
-      };
-      const onCancel = () => dialog.close();
-      const onClose = () => {
-        form.removeEventListener("submit", onSubmit);
-        cancelButton.removeEventListener("click", onCancel);
-        resolve(result);
-      };
+    const actions = document.createElement("div");
+    actions.className = "settings-actions";
+    const cancel = actionButton("Cancel", "button");
+    cancel.addEventListener("click", onCancel);
+    actions.append(cancel, actionButton("Save", "submit", "primary"));
 
-      form.addEventListener("submit", onSubmit);
-      cancelButton.addEventListener("click", onCancel);
-      dialog.addEventListener("close", onClose, { once: true });
-      dialog.showModal();
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      onSave(readValues(form, schema));
     });
+    form.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+      }
+    });
+
+    form.append(fields, actions);
+    return form;
   }
 
-  Object.assign(window.Dashboard, { openSettings });
+  Object.assign(window.Dashboard, { createSettingsForm });
 })();

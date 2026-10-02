@@ -67,6 +67,25 @@ body {
 
 .widget {
   position: absolute;
+  perspective: 1400px;
+  z-index: 2;
+}
+
+.widget-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 600ms cubic-bezier(0.34, 1.32, 0.64, 1);
+}
+
+.widget.is-flipped .widget-card {
+  transform: rotateY(180deg);
+}
+
+.widget-face {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -74,7 +93,20 @@ body {
   border-radius: 12px;
   background: var(--surface);
   box-shadow: 0 1px 3px rgb(16 24 40 / 6%);
-  z-index: 2;
+  backface-visibility: hidden;
+  transition: box-shadow 300ms ease;
+}
+
+.widget-back {
+  transform: rotateY(180deg);
+}
+
+.widget.is-flipping {
+  z-index: 4;
+}
+
+.widget.is-flipping .widget-face {
+  box-shadow: 0 18px 40px rgb(16 24 40 / 18%);
 }
 
 .widget.settling {
@@ -83,8 +115,12 @@ body {
 
 .widget.is-moving,
 .widget.is-resizing {
-  box-shadow: 0 12px 32px rgb(16 24 40 / 16%);
   z-index: 3;
+}
+
+.widget.is-moving .widget-face,
+.widget.is-resizing .widget-face {
+  box-shadow: 0 12px 32px rgb(16 24 40 / 16%);
 }
 
 .widget-toolbar {
@@ -121,7 +157,8 @@ body {
 }
 
 .widget:hover .widget-actions,
-.widget:focus-within .widget-actions {
+.widget:focus-within .widget-actions,
+.widget-back .widget-actions {
   opacity: 1;
 }
 
@@ -205,6 +242,10 @@ body.is-interacting {
   transition: opacity 120ms ease;
 }
 
+.widget.is-flipped .resize-handle {
+  display: none;
+}
+
 .widget:hover .resize-handle::after,
 .widget.is-resizing .resize-handle::after {
   opacity: 1;
@@ -273,35 +314,29 @@ body.is-interacting {
   outline: none;
 }
 
-/* Settings dialog */
+/* Inline settings (back of the widget card) */
 
-.settings-dialog {
-  width: min(420px, calc(100vw - 32px));
-  padding: 22px;
-  border: 0;
-  border-radius: 14px;
-  box-shadow: 0 24px 60px rgb(16 24 40 / 25%);
-}
-
-.settings-dialog::backdrop {
-  background: rgb(16 24 40 / 30%);
-}
-
-.settings-dialog h2 {
-  margin: 0 0 16px;
-  font-size: 17px;
-  font-weight: 600;
+.settings-form {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-fields {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  gap: 14px;
+  align-content: start;
+  gap: 10px;
+  padding: 10px 12px;
+  overflow: auto;
 }
 
 .settings-field {
   display: grid;
-  gap: 6px;
-  font-size: 13px;
+  gap: 4px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -315,12 +350,12 @@ body.is-interacting {
 .settings-field input:not([type="checkbox"], [type="color"]),
 .settings-field select {
   width: 100%;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--text);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .settings-field input:focus,
@@ -332,24 +367,26 @@ body.is-interacting {
 .settings-empty {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .settings-actions {
+  flex: 0 0 auto;
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 22px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--border);
 }
 
 .settings-actions button {
-  padding: 8px 16px;
+  padding: 4px 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
 }
 

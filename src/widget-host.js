@@ -1,6 +1,6 @@
 (() => {
   window.Dashboard ??= {};
-  const { COLUMNS, clampPosition, clampSize, defaultSettings, pixelsToCell, pixelsToSize, postToWidget, sameRect, toPixels } = window.Dashboard;
+  const { COLUMNS, clampPosition, clampSize, createSettingsForm, defaultSettings, pixelsToCell, pixelsToSize, postToWidget, sameRect, toPixels } = window.Dashboard;
 
   function button(label, text, onClick) {
     const el = document.createElement("button");
@@ -14,13 +14,14 @@
   }
 
   class WidgetView {
-    constructor({ instance, definition, board, onCommit, onOpenSettings, onRemove }) {
+    constructor({ instance, definition, board, onCommit, onRemove }) {
       this.instance = instance;
       this.definition = definition;
       this.board = board;
       this.onCommit = onCommit;
       this.ready = false;
-      this.element = this.#render(onOpenSettings, onRemove);
+      this.flipped = false;
+      this.element = this.#render(onRemove);
     }
 
     get id() {
@@ -48,23 +49,28 @@
       return this.definition?.minSize ?? { w: 1, h: 1 };
     }
 
-    #render(onOpenSettings, onRemove) {
-      const element = document.createElement("article");
-      element.className = "widget";
-      element.dataset.id = this.id;
-
+    #toolbar(title, buttons) {
       const toolbar = document.createElement("header");
       toolbar.className = "widget-toolbar";
       const name = document.createElement("span");
       name.className = "widget-name";
-      name.textContent = this.name;
+      name.textContent = title;
       const actions = document.createElement("div");
       actions.className = "widget-actions";
-      const settingsButton = button("Widget settings", "⚙", () => onOpenSettings(this));
-      settingsButton.disabled = !this.definition;
-      actions.append(settingsButton, button("Remove widget", "✕", () => onRemove(this)));
+      actions.append(...buttons);
       toolbar.append(name, actions);
       toolbar.addEventListener("pointerdown", (event) => this.#startInteraction(event, "move"));
+      return toolbar;
+    }
+
+    #render(onRemove) {
+      const element = document.createElement("article");
+      element.className = "widget";
+      element.dataset.id = this.id;
+
+      const settingsButton = button("Widget settings", "⚙", () => this.openSettings());
+      settingsButton.disabled = !this.definition;
+      const toolbar = this.#toolbar(this.name, [settingsButton, button("Remove widget", "✕", () => onRemove(this))]);
 
       const body = document.createElement("div");
       body.className = "widget-body";
@@ -89,8 +95,64 @@
       handle.title = "Resize";
       handle.addEventListener("pointerdown", (event) => this.#startInteraction(event, "resize"));
 
-      element.append(toolbar, body, handle);
+      this.front = document.createElement("section");
+      this.front.className = "widget-face widget-front";
+      this.front.append(toolbar, body);
+
+      this.back = document.createElement("section");
+      this.back.className = "widget-face widget-back";
+      this.back.setAttribute("aria-label", `${this.name} settings`);
+      this.back.inert = true;
+
+      // The iframe is never moved in the DOM (that would reload it); only the card rotates.
+      this.card = document.createElement("div");
+      this.card.className = "widget-card";
+      this.card.append(this.front, this.back);
+      this.card.addEventListener("transitionend", (event) => {
+        if (event.target === this.card && event.propertyName === "transform") this.#onFlipEnd();
+      });
+
+      element.append(this.card, handle);
       return element;
+    }
+
+    openSettings() {
+      if (!this.definition || this.flipped) return;
+      const form = createSettingsForm(this.definition, this.settings, {
+        onSave: (values) => {
+          this.instance.settings = values;
+          this.onCommit(this);
+          this.pushSettings();
+          this.closeSettings();
+        },
+        onCancel: () => this.closeSettings()
+      });
+      const close = button("Close settings", "✕", () => this.closeSettings());
+      this.back.replaceChildren(this.#toolbar(`${this.name} · Settings`, [close]), form);
+      this.#flip(true);
+    }
+
+    closeSettings() {
+      if (!this.flipped) return;
+      this.#flip(false);
+    }
+
+    #flip(flipped) {
+      this.flipped = flipped;
+      this.front.inert = flipped;
+      this.back.inert = !flipped;
+      this.element.classList.add("is-flipping");
+      this.element.classList.toggle("is-flipped", flipped);
+      if (flipped) {
+        this.back.querySelector(".settings-form input, .settings-form select, .settings-form button")?.focus({ preventScroll: true });
+      } else {
+        this.front.querySelector('[aria-label="Widget settings"]')?.focus({ preventScroll: true });
+      }
+    }
+
+    #onFlipEnd() {
+      this.element.classList.remove("is-flipping");
+      if (!this.flipped) this.back.replaceChildren();
     }
 
     layout(rect = this.rect) {

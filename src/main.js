@@ -1,6 +1,6 @@
 (async () => {
   window.Dashboard ??= {};
-  const { Board, WidgetView, clampSize, defaultSettings, findFreeSlot, listenToWidgets, loadRegistry, loadState, openSettings, saveState } = window.Dashboard;
+  const { Board, WidgetView, clampSize, defaultSettings, findFreeSlot, listenToWidgets, loadRegistry, loadState, saveState } = window.Dashboard;
 
   const board = new Board(document.querySelector("#board"), document.querySelector("#placeholder"));
   const emptyHint = document.querySelector("#empty-hint");
@@ -20,7 +20,6 @@
       definition: registry.get(instance.type),
       board,
       onCommit: persist,
-      onOpenSettings: editSettings,
       onRemove: removeWidget
     });
     board.add(view);
@@ -43,14 +42,6 @@
     board.remove(view.id);
     state.widgets = state.widgets.filter((widget) => widget.id !== view.id);
     persist();
-  }
-
-  async function editSettings(view) {
-    const values = await openSettings(view.definition, view.settings);
-    if (!values) return;
-    view.instance.settings = values;
-    persist();
-    view.pushSettings();
   }
 
   function setPickerOpen(open) {

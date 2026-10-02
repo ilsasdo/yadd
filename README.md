@@ -21,7 +21,8 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
 - **Move** a widget by dragging its top bar; **resize** it from the bottom-right corner.
   Both snap to an invisible 12-column grid (shown faintly while dragging). Drops that
   would overlap another widget snap back.
-- Hover a widget to show **⚙ settings** and **✕ remove**.
+- Hover a widget to show **⚙ settings** and **✕ remove**. Settings flip the widget over and
+  are edited on its back; **Save** (or Enter) applies them, **Cancel** (or Esc) flips it back.
 - Layout and settings are saved in `chrome.storage.local` (or `localStorage` when opened as a file).
 
 ## Project layout
@@ -29,7 +30,7 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
 ```
 manifest.json          MV3 manifest (new tab override, storage, sandboxed widget pages)
 newtab.html/styles.css Host page
-src/                   Host logic as plain scripts sharing `window.Dashboard` (grid math, storage, registry, widget frames, settings dialog)
+src/                   Host logic as plain scripts sharing `window.Dashboard` (grid math, storage, registry, widget frames, inline settings form)
 widgets/sdk.js         SDK loaded by every widget page
 widgets/<type>/        One folder per widget type
 ```
