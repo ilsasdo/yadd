@@ -1,0 +1,368 @@
+:root {
+  --page-padding: 24px;
+  --surface: #ffffff;
+  --text: #1f2933;
+  --muted: #6b7785;
+  --border: #e3e7ec;
+  --accent: #2f6fed;
+  --danger: #d64545;
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--surface);
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: var(--page-padding);
+  background: var(--surface);
+}
+
+/* Board + invisible grid */
+
+.board {
+  position: relative;
+  min-height: calc(100vh - 2 * var(--page-padding));
+}
+
+.board.show-grid {
+  background-image:
+    linear-gradient(to bottom, transparent var(--row), var(--surface) var(--row)),
+    linear-gradient(to right, rgb(47 111 237 / 6%) var(--col), transparent var(--col));
+  background-size:
+    100% calc(var(--row) + var(--gap)),
+    calc(var(--col) + var(--gap)) 100%;
+}
+
+.placeholder {
+  position: absolute;
+  border: 2px dashed rgb(47 111 237 / 55%);
+  border-radius: 12px;
+  background: rgb(47 111 237 / 8%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.placeholder.invalid {
+  border-color: rgb(214 69 69 / 65%);
+  background: rgb(214 69 69 / 8%);
+}
+
+.empty-hint {
+  position: fixed;
+  inset: 50% 0 auto;
+  margin: 0;
+  color: var(--muted);
+  text-align: center;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Widgets */
+
+.widget {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(16 24 40 / 6%);
+  z-index: 2;
+}
+
+.widget.settling {
+  transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease;
+}
+
+.widget.is-moving,
+.widget.is-resizing {
+  box-shadow: 0 12px 32px rgb(16 24 40 / 16%);
+  z-index: 3;
+}
+
+.widget-toolbar {
+  height: 30px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 6px 0 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.widget.is-moving .widget-toolbar {
+  cursor: grabbing;
+}
+
+.widget-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.widget-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.widget:hover .widget-actions,
+.widget:focus-within .widget-actions {
+  opacity: 1;
+}
+
+.icon-button {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.icon-button:hover {
+  background: #f0f2f5;
+  color: var(--text);
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.widget-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.widget-frame {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
+body.is-interacting .widget-frame {
+  pointer-events: none;
+}
+
+body.is-interacting {
+  user-select: none;
+}
+
+.widget-missing {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: nwse-resize;
+  touch-action: none;
+  z-index: 1;
+}
+
+.resize-handle::after {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #b8c0ca;
+  border-bottom: 2px solid #b8c0ca;
+  border-radius: 0 0 3px;
+  content: "";
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.widget:hover .resize-handle::after,
+.widget.is-resizing .resize-handle::after {
+  opacity: 1;
+}
+
+/* Add button + picker */
+
+.fab-wrap {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 10;
+}
+
+.fab {
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgb(47 111 237 / 35%);
+  cursor: pointer;
+  transition: transform 140ms ease;
+}
+
+.fab:hover {
+  transform: scale(1.05);
+}
+
+.fab[aria-expanded="true"] {
+  transform: rotate(45deg);
+}
+
+.picker {
+  position: absolute;
+  right: 0;
+  bottom: 64px;
+  min-width: 200px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgb(16 24 40 / 14%);
+}
+
+.picker-item {
+  width: 100%;
+  display: block;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.picker-item:hover,
+.picker-item:focus-visible {
+  background: #f0f4fd;
+  outline: none;
+}
+
+/* Settings dialog */
+
+.settings-dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 22px;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgb(16 24 40 / 25%);
+}
+
+.settings-dialog::backdrop {
+  background: rgb(16 24 40 / 30%);
+}
+
+.settings-dialog h2 {
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.settings-fields {
+  display: grid;
+  gap: 14px;
+}
+
+.settings-field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.settings-field.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.settings-field input:not([type="checkbox"], [type="color"]),
+.settings-field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: 2px solid rgb(47 111 237 / 35%);
+  border-color: var(--accent);
+}
+
+.settings-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.settings-actions button {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.settings-actions .primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
