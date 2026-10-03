@@ -52,5 +52,11 @@
     });
   }
 
-  Object.assign(window.Dashboard, { loadState, saveState });
+  Object.assign(window.Dashboard, {
+    STATE_VERSION: VERSION,
+    isValidWidget,
+    normalizeWidget,
+    loadState,
+    saveState
+  });
 })();

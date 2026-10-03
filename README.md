@@ -18,6 +18,8 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
 ## Using the dashboard
 
 - Click **+** (bottom-right) and pick a widget to add it at the first free spot.
+- Use **Export widgets as JSON** or **Import widgets from JSON** in the **+** menu to back up
+  or replace the full dashboard. Exports include widget settings, including any API tokens.
 - **Move** a widget by dragging its top bar; **resize** it from the bottom-right corner.
   Both snap to an invisible 12-column grid (shown faintly while dragging). Drops that
   would overlap another widget snap back.

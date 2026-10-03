@@ -314,6 +314,12 @@ body.is-interacting {
   outline: none;
 }
 
+.picker-separator {
+  margin: 5px 6px;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
 /* Inline settings (back of the widget card) */
 
 .settings-form {
