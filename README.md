@@ -1,19 +1,20 @@
-# New Tab
+# New Tab Dashboard
 
-A Chrome extension that replaces the new tab page with a white, grid-based widget dashboard.
+A Vue-powered Chrome extension that replaces the new tab page with a white, grid-based widget dashboard.
 
-## Install locally
+## Build and install
 
-1. Open `chrome://extensions` in Chrome.
-2. Turn on **Developer mode**.
-3. Select **Load unpacked** and choose this project folder.
-4. Open a new tab.
+1. Install Node.js 18+ and run `npm install`.
+2. Run `npm run build`.
+3. Open `chrome://extensions` in Chrome and turn on **Developer mode**.
+4. Select **Load unpacked** and choose the generated `dist/` folder.
+5. Open a new tab.
 
-## Run without installing
+Use `npm run dev` to run the dashboard in a browser during development. The build output
+is the installable extension; source files should not be loaded directly into Chrome.
 
-Open `newtab.html` directly in a browser (`file://`). No build step or server is needed.
-Outside the extension, layout and settings are stored in `localStorage` instead of
-`chrome.storage.local`.
+The dashboard continues to use `localStorage` when served outside the extension and
+`chrome.storage.local` when running as an extension.
 
 ## Using the dashboard
 
@@ -26,7 +27,7 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
 - Hover a widget to show **⚙ settings** and **✕ remove**. Settings flip the widget over and
   are edited on its back; **Save** (or Enter) applies them, **Cancel** (or Esc) flips it back.
 - Every widget has a **Card title** setting shown in its top bar (leave it blank to use the widget's name).
-- Layout and settings are saved in `chrome.storage.local` (or `localStorage` when opened as a file).
+- Layout and settings are saved in `chrome.storage.local` (or `localStorage` outside the extension).
 
 ## Widgets
 
@@ -45,9 +46,10 @@ Outside the extension, layout and settings are stored in `localStorage` instead 
 ## Project layout
 
 ```
-manifest.json          MV3 manifest (new tab override, storage, sandboxed widget pages)
-newtab.html/styles.css Host page
-src/                   Host logic as plain scripts sharing `window.Dashboard` (grid math, storage, registry, widget frames, inline settings form)
+manifest.json          MV3 manifest (copied into the build output)
+newtab.html             Vite entry page
+src/                    Vue dashboard plus ES modules for grid math, storage, widget frames and forms
+vite.config.js          Bundles the host and copies the manifest and sandboxed widget pages
 widgets/sdk.js         SDK loaded by every widget page
 widgets/<type>/        One folder per widget type
 ```
@@ -59,7 +61,7 @@ access to `chrome.*` APIs; the host stores everything and talks to it via `postM
 through the SDK.
 
 1. Create `widgets/<type>/` with:
-   - `definition.js` – the widget manifest (a script rather than JSON so it also loads from `file://`):
+   - `definition.js` – the widget manifest, loaded by the host as a script:
      ```js
      Dashboard.registerWidget({
        type: "clock",

@@ -1,10 +1,8 @@
-(() => {
-  window.Dashboard ??= {};
-  const { collides, getMetrics, toPixels } = window.Dashboard;
+import { collides, getMetrics, toPixels } from "./grid.js";
 
   const EXTRA_ROWS = 2;
 
-  class Board {
+export class Board {
     constructor(element, placeholder) {
       this.element = element;
       this.placeholder = placeholder;
@@ -81,7 +79,4 @@
     hidePlaceholder() {
       this.placeholder.hidden = true;
     }
-  }
-
-  Object.assign(window.Dashboard, { Board });
-})();
+}

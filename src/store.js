@@ -1,11 +1,9 @@
-(() => {
-  window.Dashboard ??= {};
-  const { clampPosition, clampSize } = window.Dashboard;
+import { clampPosition, clampSize } from "./grid.js";
 
   const STORAGE_KEY = "dashboard";
   const VERSION = 1;
 
-  function isValidWidget(widget) {
+export function isValidWidget(widget) {
     return (
       widget &&
       typeof widget.id === "string" &&
@@ -14,7 +12,7 @@
     );
   }
 
-  function normalizeWidget(widget) {
+export function normalizeWidget(widget) {
     const size = clampSize(widget);
     const rect = clampPosition({ x: widget.x, y: widget.y, ...size });
     const settings = widget.settings && typeof widget.settings === "object" ? widget.settings : {};
@@ -38,7 +36,7 @@
     else localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  async function loadState() {
+export async function loadState() {
     const stored = await read();
     if (!stored || stored.version !== VERSION || !Array.isArray(stored.widgets)) {
       return { version: VERSION, widgets: [] };
@@ -46,17 +44,10 @@
     return { version: VERSION, widgets: stored.widgets.filter(isValidWidget).map(normalizeWidget) };
   }
 
-  function saveState(state) {
+export function saveState(state) {
     return write(state).catch((error) => {
       console.error("Failed to save dashboard", error);
     });
   }
 
-  Object.assign(window.Dashboard, {
-    STATE_VERSION: VERSION,
-    isValidWidget,
-    normalizeWidget,
-    loadState,
-    saveState
-  });
-})();
+export const STATE_VERSION = VERSION;

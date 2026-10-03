@@ -1,19 +1,22 @@
-(() => {
-  window.Dashboard ??= {};
-  const { CARD_TITLE_KEY, COLUMNS, clampPosition, clampSize, createSettingsForm, defaultSettings, pixelsToCell, pixelsToSize, postToWidget, sameRect, toPixels } = window.Dashboard;
+import { clampPosition, clampSize, pixelsToCell, pixelsToSize, sameRect, toPixels, COLUMNS } from "./grid.js";
+import { createSettingsForm } from "./settings-form.js";
+import { postToWidget } from "./bridge.js";
+import { defaultSettings } from "./registry.js";
 
-  function button(label, text, onClick) {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "icon-button";
-    el.title = label;
-    el.setAttribute("aria-label", label);
-    el.textContent = text;
-    el.addEventListener("click", onClick);
-    return el;
-  }
+const CARD_TITLE_KEY = "cardTitle";
 
-  class WidgetView {
+function button(label, text, onClick) {
+  const element = document.createElement("button");
+  element.type = "button";
+  element.className = "icon-button";
+  element.title = label;
+  element.setAttribute("aria-label", label);
+  element.textContent = text;
+  element.addEventListener("click", onClick);
+  return element;
+}
+
+export class WidgetView {
     constructor({ instance, definition, board, onCommit, onRemove }) {
       this.instance = instance;
       this.definition = definition;
@@ -272,7 +275,4 @@
       target.addEventListener("pointerup", onUp);
       target.addEventListener("pointercancel", onCancel);
     }
-  }
-
-  Object.assign(window.Dashboard, { WidgetView });
-})();
+}

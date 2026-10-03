@@ -1,20 +1,19 @@
-(() => {
-  window.Dashboard ??= {};
-  const CHANNEL = "chrome-homepage-widget";
+const CHANNEL = "chrome-homepage-widget";
 
-  function postToWidget(frameWindow, type, payload = {}) {
-    // Sandboxed widget pages have an opaque origin, so "*" is the only valid target.
-    frameWindow?.postMessage({ channel: CHANNEL, type, payload }, "*");
-  }
+export function postToWidget(frameWindow, type, payload = {}) {
+  // Sandboxed widget pages have an opaque origin, so "*" is the only valid target.
+  frameWindow?.postMessage({ channel: CHANNEL, type, payload }, "*");
+}
 
-  function listenToWidgets(resolveView) {
-    window.addEventListener("message", (event) => {
-      const message = event.data;
-      if (!message || message.channel !== CHANNEL || typeof message.type !== "string") return;
-      const view = resolveView(event.source);
-      view?.handleMessage(message);
-    });
-  }
+export function listenToWidgets(resolveView) {
+  const onMessage = (event) => {
+    const message = event.data;
+    if (!message || message.channel !== CHANNEL || typeof message.type !== "string") return;
+    const view = resolveView(event.source);
+    view?.handleMessage(message);
+  };
+  window.addEventListener("message", onMessage);
+  return () => window.removeEventListener("message", onMessage);
+}
 
-  Object.assign(window.Dashboard, { CHANNEL, postToWidget, listenToWidgets });
-})();
+export { CHANNEL };

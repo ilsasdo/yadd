@@ -3,28 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A grid-based widget dashboard for your Chrome new tab.">
     <title>New tab</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="src/grid.js" defer></script>
-    <script src="src/store.js" defer></script>
-    <script src="src/bridge.js" defer></script>
-    <script src="src/registry.js" defer></script>
-    <script src="src/board.js" defer></script>
-    <script src="src/settings-form.js" defer></script>
-    <script src="src/widget-host.js" defer></script>
-    <script src="src/main.js" defer></script>
   </head>
   <body>
-    <main id="board" class="board" aria-label="Widget dashboard">
-      <div id="placeholder" class="placeholder" hidden></div>
-    </main>
-
-    <p id="empty-hint" class="empty-hint" hidden>Click <strong>+</strong> to add your first widget</p>
-
-    <div class="fab-wrap">
-      <div id="picker" class="picker" role="menu" aria-label="Add widget" hidden></div>
-      <button id="add-widget" class="fab" type="button" aria-label="Add widget" aria-haspopup="menu" aria-expanded="false">+</button>
-    </div>
-    <input id="import-file" type="file" accept=".json,application/json" hidden>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

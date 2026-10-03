@@ -1,6 +1,3 @@
-(() => {
-  window.Dashboard ??= {};
-
   function normalizeOptions(options = []) {
     return options.map((option) =>
       typeof option === "object" ? { value: String(option.value), label: option.label ?? String(option.value) } : { value: String(option), label: String(option) }
@@ -61,7 +58,7 @@
   }
 
   // Builds an inline settings form for a widget definition. Calls onSave(values) or onCancel().
-  function createSettingsForm(definition, currentValues, { onSave, onCancel }) {
+export function createSettingsForm(definition, currentValues, { onSave, onCancel }) {
     const schema = definition.settings;
     const form = document.createElement("form");
     form.className = "settings-form";
@@ -95,7 +92,4 @@
 
     form.append(fields, actions);
     return form;
-  }
-
-  Object.assign(window.Dashboard, { createSettingsForm });
-})();
+}
